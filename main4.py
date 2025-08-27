@@ -31,18 +31,18 @@ client = discord.Client(intents=intents)
 
 # === Discord 全域變數 ===
 discord_channel = None
-sentinel_mode = True  # 🟢 預設啟用哨兵模式
+sentinel_mode = True  # 預設啟用哨兵模式
 
 
 @client.event
 async def on_ready():
     global discord_channel
-    print(f"✅ 登入成功：{client.user}")
+    print(f"登入成功：{client.user}")
     discord_channel = client.get_channel(TARGET_CHANNEL_ID)
     if discord_channel:
-        print(f"✅ 綁定至頻道：{discord_channel.name}")
+        print(f"綁定至頻道：{discord_channel.name}")
     else:
-        print("❌ 找不到指定的頻道 ID，請確認 BOT 已加入伺服器並擁有該頻道權限")
+        print("找不到指定的頻道 ID，請確認 BOT 已加入伺服器並擁有該頻道權限")
 
 
 @client.event
@@ -56,11 +56,11 @@ async def on_message(message):
 
     if content == "!sentinel on":
         sentinel_mode = True
-        await message.channel.send("🟢 哨兵模式已啟用。")
+        await message.channel.send("哨兵模式已啟用。")
 
     elif content == "!sentinel off":
         sentinel_mode = False
-        await message.channel.send("🔴 哨兵模式已停用。")
+        await message.channel.send("哨兵模式已停用。")
 
 
 # === Gemini 圖片描述函式 ===
@@ -78,7 +78,7 @@ async def handle_gemini_description(channel):
         await channel.send(description)
 
     except Exception as e:
-        await channel.send(f"❌ 出錯了：{e}")
+        await channel.send(f"出錯了：{e}")
 
 
 # === 背景監聽程式（Serial）===
@@ -88,9 +88,9 @@ def background_listener():
     if use_serial:
         try:
             ser = serial.Serial(SERIAL_PORT, BAUDRATE, timeout=1)
-            print(f"📡 Serial 已啟用：{SERIAL_PORT}")
+            print(f"Serial 已啟用：{SERIAL_PORT}")
         except Exception as e:
-            print(f"❌ Serial 初始化失敗：{e}")
+            print(f"Serial 初始化失敗：{e}")
             use_serial = False
 
     last_trigger_time = 0
@@ -102,7 +102,7 @@ def background_listener():
 
         while True:
             conn, addr = s.accept()
-            print(f"✅ ESP 已連接：{addr}")
+            print(f"ESP 已連接：{addr}")
             with conn:
                 while True:
                     msg, line = "", ""
@@ -111,7 +111,7 @@ def background_listener():
                         conn.settimeout(0.5)
                         data = conn.recv(1024)
                         if not data:
-                            print("⚠️ ESP 斷線，等待重新連線...")
+                            print("ESP 斷線，等待重新連線...")
                             break
                         msg = data.decode().strip()
                         print(f"[ESP] 收到訊息：{msg}")
@@ -127,7 +127,7 @@ def background_listener():
                         line in ["FACE_DETECTED", "PIR_DETECTED", "SOUND_DETECTED"]) and \
                             (time.time() - last_trigger_time > TRIGGER_COOLDOWN):
                         last_trigger_time = time.time()
-                        print("✅ 偵測到事件，準備擷取畫面")
+                        print("偵測到事件，準備擷取畫面")
                         cap = cv2.VideoCapture(RTSP_URL, cv2.CAP_FFMPEG)
                         for _ in range(30):
                             cap.read()
@@ -136,14 +136,14 @@ def background_listener():
                         if ret:
                             cv2.imwrite(SAVE_PATH, frame)
                             time.sleep(0.5)
-                            print(f"📸 擷取完成，儲存為 {SAVE_PATH}")
+                            print(f"擷取完成，儲存為 {SAVE_PATH}")
 
                             event_type = msg or line
                             caption = {
-                                "FACE_DETECTED": "🧠 偵測到人臉！",
-                                "PIR_DETECTED": "🚶 偵測到人體移動！",
-                                "SOUND_DETECTED": "🎤 偵測到聲音！"
-                            }.get(event_type, "📸 擷取畫面")
+                                "FACE_DETECTED": "偵測到人臉！",
+                                "PIR_DETECTED": "偵測到人體移動！",
+                                "SOUND_DETECTED": "偵測到聲音！"
+                            }.get(event_type, "擷取畫面")
 
                             if sentinel_mode and discord_channel:
                                 asyncio.run_coroutine_threadsafe(
@@ -155,9 +155,9 @@ def background_listener():
                                     client.loop
                                 )
                             else:
-                                print("⚠️ 哨兵模式已停用，不傳送到 Discord/Gemini。")
+                                print("哨兵模式已停用，不傳送到 Discord/Gemini。")
                         else:
-                            print("❌ 擷取影格失敗")
+                            print("擷取影格失敗")
 
 
 # === 啟動背景執行緒 ===
