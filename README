@@ -1,0 +1,20 @@
+python -m venv .venv
+.venv\Scripts\activate
+
+#macos
+python3 -m venv .macvenv
+source .macvenv/bin/activate
+
+pip install opencv-python
+pip install pyserial
+pip install google_genai
+pip install discord
+
+
+arduino hub8735
+https://github.com/ideashatch/HUB-8735/raw/main/amebapro2_arduino/Arduino_package/ideasHatch.json
+
+https://raw.githubusercontent.com/ideashatch/HUB-8735/main/amebapro2_arduino/Arduino_package/ideasHatch.json
+
+discord頻道id:
+1381158562507522079
