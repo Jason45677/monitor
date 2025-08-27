@@ -57,17 +57,17 @@ unsigned long lastLoopTime = 0;
 void setup() {
     Serial.begin(115200);
     delay(1000);  // 穩定 Serial 初始化
-    Serial.println("📟 系統啟動中...");
+    Serial.println("系統啟動中...");
 
     // === WiFi 連線嘗試 ===
     while (status != WL_CONNECTED) {
-        Serial.print("🔌 嘗試連接 WiFi：");
+        Serial.print("嘗試連接 WiFi：");
         Serial.println(ssid);
         status = WiFi.begin(ssid, pass);
         delay(2000);
     }
     ip = WiFi.localIP();
-    Serial.print("📶 已連接，IP：");
+    Serial.print("已連接，IP：");
     Serial.println(ip);
 
     // === 攝影機與模型初始化 ===
@@ -88,7 +88,7 @@ void setup() {
     videoStreamer.registerInput(Camera.getStream(CHANNEL));
     videoStreamer.registerOutput(rtsp);
     if (videoStreamer.begin() != 0)
-        Serial.println("❌ RTSP StreamIO 啟動失敗");
+        Serial.println("RTSP StreamIO 啟動失敗");
 
     Camera.channelBegin(CHANNEL);
 
@@ -97,7 +97,7 @@ void setup() {
     videoStreamerNN.setTaskPriority();
     videoStreamerNN.registerOutput(facedet);
     if (videoStreamerNN.begin() != 0)
-        Serial.println("❌ NN StreamIO 啟動失敗");
+        Serial.println("NN StreamIO 啟動失敗");
 
     Camera.channelBegin(CHANNELNN);
 
@@ -123,14 +123,14 @@ void loop() {
         String input = Serial.readStringUntil('\n');
         input.trim();
         if (input.equalsIgnoreCase("exit")) {
-            Serial.println("🛑 收到 exit，關閉所有模組...");
+            Serial.println("收到 exit，關閉所有模組...");
             videoStreamer.end();
             videoStreamerNN.end();
             rtsp.end();
             facedet.end();
             Camera.channelEnd(CHANNEL);
             Camera.channelEnd(CHANNELNN);
-            Serial.println("✅ 所有模組已關閉。");
+            Serial.println("所有模組已關閉。");
             shouldExit = true;
         }
     }
@@ -149,22 +149,22 @@ void loop() {
     int soundVal = analogRead(SOUND_PIN);
     bool soundDetected = soundVal > SOUND_THRESHOLD;
 
-    Serial.print("🎧 聲音強度 = ");
+    Serial.print("聲音強度 = ");
     Serial.println(soundVal);
 
     // === RGB LED 控制 ===
     if (pirDetected) {
-        Serial.println("🚶 偵測到人體活動！");
+        Serial.println("偵測到人體活動！");
         digitalWrite(LED_R_PIN, HIGH);
         digitalWrite(LED_G_PIN, LOW);
         digitalWrite(LED_B_PIN, LOW);
     } else if (soundDetected) {
-        Serial.println("🎤 偵測到聲音！");
+        Serial.println("偵測到聲音！");
         digitalWrite(LED_R_PIN, LOW);
         digitalWrite(LED_G_PIN, LOW);
         digitalWrite(LED_B_PIN, HIGH);
     } else {
-        Serial.println("🟩 無活動（人/聲）");
+        Serial.println("無活動（人/聲）");
         digitalWrite(LED_R_PIN, LOW);
         digitalWrite(LED_G_PIN, HIGH);
         digitalWrite(LED_B_PIN, LOW);
@@ -173,7 +173,7 @@ void loop() {
     // === 嘗試連線至 Python 主機 ===
     static unsigned long lastTryConnect = 0;
     if (!client.connected() && millis() - lastTryConnect > 3000) {
-        Serial.println("🔄 嘗試連線到 Python 主機...");
+        Serial.println("嘗試連線到 Python 主機...");
         client.connect(remote_host_ip, remote_host_port);
         lastTryConnect = millis();
     }
@@ -181,7 +181,7 @@ void loop() {
     // === 傳送人臉事件（有 cooldown）===
     if (client.connected() && faceDetectedFlag && (millis() - lastFaceSend > FACE_COOLDOWN)) {
         client.println("FACE_DETECTED");
-        Serial.println("📤 傳送：FACE_DETECTED");
+        Serial.println("傳送：FACE_DETECTED");
         lastFaceSend = millis();
         faceDetectedFlag = false;
     }
@@ -189,14 +189,14 @@ void loop() {
     // === 傳送聲音事件（有 cooldown）===
     if (client.connected() && soundDetected && (millis() - lastSoundSend > SOUND_COOLDOWN)) {
         client.println("SOUND_DETECTED");
-        Serial.println("📤 傳送：SOUND_DETECTED");
+        Serial.println("傳送：SOUND_DETECTED");
         lastSoundSend = millis();
     }
 
     // === 傳送人體事件（有 cooldown）===
     if (client.connected() && pirDetected && (millis() - lastPIRSend > PIR_COOLDOWN)) {
         client.println("PIR_DETECTED");
-        Serial.println("📤 傳送：PIR_DETECTED");
+        Serial.println("傳送：PIR_DETECTED");
         lastPIRSend = millis();
     }
 }
@@ -210,7 +210,7 @@ void FDPostProcess(std::vector<FaceDetectionResult> results) {
     OSD.createBitmap(CHANNEL);
 
     if (facedet.getResultCount() > 0) {
-        Serial.println("👤 偵測到人臉");
+        Serial.println("偵測到人臉");
 
         for (uint32_t i = 0; i < facedet.getResultCount(); i++) {
             FaceDetectionResult item = results[i];
